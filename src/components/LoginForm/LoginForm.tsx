@@ -25,9 +25,14 @@ function LoginForm() {
         let data: PostData = {
           token: accessToken // Asegúrate de que la variable `mail` esté definida
         };
-
+        let url = "";
+        if (config.serverPort != 0) {
+          url = config.srvURL + ":" + config.serverPort;
+        } else {
+          url = config.srvURL
+        }
         // Ejemplo de una solicitud de datos al montar el componente
-        fetch(config.srvURL + ":" + config.serverPort + "/verify-token", {
+        fetch(url + "/verify-token", {
           method: 'POST', // Método HTTP
           headers: {
             'Content-Type': 'application/json' // Indica que el cuerpo de la solicitud es JSON
@@ -74,7 +79,13 @@ function LoginForm() {
   function sendLoginForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const url = config.srvURL + ':' + config.serverPort + '/send-mail'; // URL de la API o endpoint
+    let url = "";
+    if (config.serverPort != 0) {
+      url = config.srvURL + ":" + config.serverPort;
+    } else {
+      url = config.srvURL
+    }
+
     setMail(mail)
     // Define el tipo de datos que enviarás
     interface PostData {
@@ -87,7 +98,7 @@ function LoginForm() {
     };
 
     // Realizar la solicitud POST
-    fetch(url, {
+    fetch(url + '/send-mail', {
       method: 'POST', // Método HTTP
       headers: {
         'Content-Type': 'application/json' // Indica que el cuerpo de la solicitud es JSON
@@ -111,7 +122,13 @@ function LoginForm() {
   function sendVerificationCode(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const url = config.srvURL + ':' + config.serverPort + '/verify-code'; // URL de la API o endpoint
+    let url = "";
+    if (config.serverPort != 0) {
+      url = config.srvURL + ":" + config.serverPort;
+    } else {
+      url = config.srvURL
+    }
+
     setMail(mail)
     // Define el tipo de datos que enviarás
     interface PostData {
@@ -126,7 +143,7 @@ function LoginForm() {
     };
 
     // Realizar la solicitud POST
-    fetch(url, {
+    fetch(url + '/verify-code', {
       method: 'POST', // Método HTTP
       headers: {
         'Content-Type': 'application/json' // Indica que el cuerpo de la solicitud es JSON

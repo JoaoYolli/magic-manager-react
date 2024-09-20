@@ -15,9 +15,17 @@ function MainPage() {
   };
 
   async function searchRandCard() {
-    const url = searchingCommander
-      ? 'http://localhost:6173/randCommander'
-      : 'http://localhost:6173/randCard';
+
+    let url = "";
+        if(config.serverPort != 0){
+          url = config.srvURL + ":" + config.serverPort;
+        }else{
+          url = config.srvURL
+        }
+
+    url += searchingCommander
+      ? '/randCommander'
+      : '/randCard';
 
     fetch(url, {
       method: 'GET',
@@ -70,7 +78,14 @@ function MainPage() {
         token: accessToken,
       };
 
-      const response = await fetch(`${config.srvURL}:${config.serverPort}/verify-token`, {
+      let url = "";
+        if(config.serverPort != 0){
+          url = config.srvURL + ":" + config.serverPort;
+        }else{
+          url = config.srvURL
+        }
+
+      const response = await fetch(`${url}/verify-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
