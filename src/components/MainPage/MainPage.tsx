@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './MainPage.css'
+import './MainPage.css';
 import { useNavigate } from 'react-router-dom';
 import config from '../../config';
 import CardComponent from '../CardComponent/CardComponent';
@@ -7,7 +7,6 @@ import CardModel from '../../models/card';
 
 function MainPage() {
   const [cardList, setCardsList] = useState<CardModel[]>([]); // Initialize as an empty array
-  const [isHovering, setIsHovering] = useState<boolean>(false); // New state for hover
   const [searchingCommander, setSearchingCommander] = useState<boolean>(false); // State for Commander checkbox
   const navigate = useNavigate();
 
@@ -16,87 +15,47 @@ function MainPage() {
   };
 
   async function searchRandCard() {
-    if (searchingCommander) {
-      
-      fetch('http://localhost:6173/randCommander', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then(async (response) => {
-          if (!response.ok) {
-            alert('Error en el servidor');
-          } else {
-            let respuesta = await response.json();
-            let cards: CardModel[] = [];
+    const url = searchingCommander
+      ? 'http://localhost:6173/randCommander'
+      : 'http://localhost:6173/randCard';
 
-            if (Array.isArray(respuesta)) {
-              respuesta.forEach((card: { name: string; image_uris: { normal: string }; scryfall_uri: string }) => {
-                let carta: CardModel = {
-                  name: card.name,
-                  imgUrl: card.image_uris?.normal || '',
-                  scryfallUrl: card.scryfall_uri || '',
-                };
-                cards.push(carta);
-              });
-            } else {
-              respuesta = respuesta.respuesta;
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          alert('Error en el servidor');
+        } else {
+          let respuesta = await response.json();
+          let cards: CardModel[] = [];
+
+          if (Array.isArray(respuesta)) {
+            respuesta.forEach((card: { name: string; image_uris: { normal: string }; scryfall_uri: string }) => {
               let carta: CardModel = {
-                name: respuesta.name,
-                imgUrl: respuesta.imgUrl || '',
-                scryfallUrl: respuesta.scryfallUrl || '',
+                name: card.name,
+                imgUrl: card.image_uris?.normal || '',
+                scryfallUrl: card.scryfall_uri || '',
               };
               cards.push(carta);
-            }
-            // setCardsList((prevCards) => [...cards, ...prevCards]); // UPDATE
-            setCardsList(cards);
-          }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-
-    } else {
-      fetch('http://localhost:6173/randCard', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then(async (response) => {
-          if (!response.ok) {
-            alert('Error en el servidor');
+            });
           } else {
-            let respuesta = await response.json();
-            let cards: CardModel[] = [];
-
-            if (Array.isArray(respuesta)) {
-              respuesta.forEach((card: { name: string; image_uris: { normal: string }; scryfall_uri: string }) => {
-                let carta: CardModel = {
-                  name: card.name,
-                  imgUrl: card.image_uris?.normal || '',
-                  scryfallUrl: card.scryfall_uri || '',
-                };
-                cards.push(carta);
-              });
-            } else {
-              respuesta = respuesta.respuesta;
-              let carta: CardModel = {
-                name: respuesta.name,
-                imgUrl: respuesta.imgUrl || '',
-                scryfallUrl: respuesta.scryfallUrl || '',
-              };
-              cards.push(carta);
-            }
-            // setCardsList((prevCards) => [...cards, ...prevCards]); // UPDATE
-            setCardsList(cards);
+            respuesta = respuesta.respuesta;
+            let carta: CardModel = {
+              name: respuesta.name,
+              imgUrl: respuesta.imgUrl || '',
+              scryfallUrl: respuesta.scryfallUrl || '',
+            };
+            cards.push(carta);
           }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-    }
+          setCardsList(cards);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   }
 
   async function init() {
@@ -133,16 +92,8 @@ function MainPage() {
 
   useEffect(() => {
     init();
-    searchRandCard();
-
-    const intervalo = setInterval(() => {
-      if (!isHovering) {
-        searchRandCard();
-      }
-    }, 20000); // 20 segundos = 20000 milisegundos
-
-    return () => clearInterval(intervalo);
-  }, [isHovering, searchingCommander]); // Depend on both isHovering and searchingCommander
+    searchRandCard(); // Get the first random card when the page loads
+  }, [searchingCommander]); // Depend only on searchingCommander
 
   //Devuelve el html
   return (
@@ -155,6 +106,9 @@ function MainPage() {
         />
         <label htmlFor="">Commander</label>
       </div>
+
+      <button onClick={searchRandCard}>Cambiar Carta</button>
+
       {cardList.map((card, index) => (
         <CardComponent key={index} card={card} />
       ))}
