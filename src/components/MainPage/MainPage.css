@@ -1,0 +1,34 @@
+/* MainPage.css */
+
+/* Estructura principal */
+.main-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  /* La sección de controles queda fija en la parte superior */
+  .controls {
+    display:block;
+    background-color: (0,0,0,0); /* Color de fondo para distinguir */
+    padding: 20px;
+    border-bottom: 1px solid #ccc;
+    flex-shrink: 0; /* Fija la sección de controles */
+  }
+  
+  /* La sección de las cartas tiene scroll */
+  .card-grid {
+    display: flex; /* Cambia a flexbox */
+    flex-wrap: wrap; /* Permite que las cartas se envuelvan en la siguiente línea */
+    gap: 20px; /* Espacio entre cartas */
+    padding: 20px;
+    overflow-y: auto; /* Scroll solo en el eje Y */
+    height: calc(100vh - 200px); /* Ajustar altura considerando la altura fija de los controles */
+    max-height: calc(100vh - 200px); /* Ajustar altura máxima */
+  }
+  
+  /* Espaciado entre cartas */
+  .card-grid > div {
+    margin-bottom: 20px;
+  }
+  

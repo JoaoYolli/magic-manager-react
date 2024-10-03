@@ -6,65 +6,75 @@ import CardComponent from '../CardComponent/CardComponent';
 import CardModel from '../../models/card';
 
 function MainPage() {
-  const [cardList, setCardsList] = useState<CardModel[]>([]); // Initialize as an empty array
-  const [searchingCommander, setSearchingCommander] = useState<boolean>(false); // State for Commander checkbox
+  const [cardList, setCardsList] = useState<CardModel[]>([]);
+  const [searchingCommander, setSearchingCommander] = useState<boolean>(false);
+  const [numberOfCards, setNumberOfCards] = useState<number>(1); // Nuevo estado para el número de cartas
   const navigate = useNavigate();
 
   const getItemFromLocalStorage = (key: string): string | null => {
     return localStorage.getItem(key);
   };
 
-  async function searchRandCard() {
-
+  async function searchRandCards(count: number) {
     let url = "";
-        if(config.serverPort != 0){
-          url = config.srvURL + ":" + config.serverPort;
-        }else{
-          url = config.srvURL
-        }
+    if (config.serverPort !== 0) {
+      url = config.srvURL + ":" + config.serverPort;
+    } else {
+      url = config.srvURL;
+    }
 
-    url += searchingCommander
-      ? '/randCommander'
-      : '/randCard';
+    const promises = []; // Para almacenar las promesas de búsqueda
 
-    fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(async (response) => {
+    for (let i = 0; i < count; i++) {
+      promises.push(fetch(url + (searchingCommander ? '/randCommander' : '/randCard'), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then(response => {
         if (!response.ok) {
-          alert('Error en el servidor');
-        } else {
-          let respuesta = await response.json();
-          let cards: CardModel[] = [];
-
-          if (Array.isArray(respuesta)) {
-            respuesta.forEach((card: { name: string; image_uris: { normal: string }; scryfall_uri: string }) => {
-              let carta: CardModel = {
-                name: card.name,
-                imgUrl: card.image_uris?.normal || '',
-                scryfallUrl: card.scryfall_uri || '',
-              };
-              cards.push(carta);
-            });
-          } else {
-            respuesta = respuesta.respuesta;
-            let carta: CardModel = {
-              name: respuesta.name,
-              imgUrl: respuesta.imgUrl || '',
-              scryfallUrl: respuesta.scryfallUrl || '',
-            };
-            cards.push(carta);
-          }
-          setCardsList(cards);
+          throw new Error('Error en el servidor');
         }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
+        return response.json();
+      }));
+    }
+
+    try {
+      const results = await Promise.all(promises);
+      const newCards: CardModel[] = [];
+
+      results.forEach(respuesta => {
+        if (Array.isArray(respuesta)) {
+          respuesta.forEach((card: { name: string; image_uris: { normal: string }; scryfall_uri: string }) => {
+            let carta: CardModel = {
+              name: card.name,
+              imgUrl: card.image_uris?.normal || '',
+              scryfallUrl: card.scryfall_uri || '',
+            };
+            newCards.push(carta);
+          });
+        } else {
+          respuesta = respuesta.respuesta;
+          let carta: CardModel = {
+            name: respuesta.name,
+            imgUrl: respuesta.imgUrl || '',
+            scryfallUrl: respuesta.scryfallUrl || '',
+          };
+          newCards.push(carta);
+        }
       });
+
+      // Actualizar la lista de cartas agregando las nuevas sin sobrescribir
+      setCardsList((prevCards) => [...prevCards, ...newCards]);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
+
+  // Nueva función para eliminar todas las cartas
+  const clearCards = () => {
+    setCardsList([]); // Vacía la lista de cartas
+  };
 
   async function init() {
     try {
@@ -79,11 +89,11 @@ function MainPage() {
       };
 
       let url = "";
-        if(config.serverPort != 0){
-          url = config.srvURL + ":" + config.serverPort;
-        }else{
-          url = config.srvURL
-        }
+      if (config.serverPort !== 0) {
+        url = config.srvURL + ":" + config.serverPort;
+      } else {
+        url = config.srvURL;
+      }
 
       const response = await fetch(`${url}/verify-token`, {
         method: 'POST',
@@ -107,27 +117,51 @@ function MainPage() {
 
   useEffect(() => {
     init();
-    searchRandCard(); // Get the first random card when the page loads
-  }, [searchingCommander]); // Depend only on searchingCommander
+    searchRandCards(numberOfCards); // Busca cartas aleatorias según el número seleccionado
+  }, []); // El array de dependencias vacío asegura que esto se ejecute solo una vez al montar
 
-  //Devuelve el html
   return (
-    <>
-      <div>
-        <input
-          type="checkbox"
-          checked={searchingCommander}
-          onChange={(e) => setSearchingCommander(e.target.checked)}
-        />
-        <label htmlFor="">Commander</label>
+    <div className="main-page">
+      {/* Sección de controles */}
+      <div className="controls">
+        <div>
+          <label htmlFor="numberOfCards">Número de cartas:</label>
+          <select
+            id="numberOfCards"
+            value={numberOfCards}
+            onChange={(e) => setNumberOfCards(Number(e.target.value))}
+          >
+            {/* Genera opciones de 1 a 10 */}
+            {[...Array(10)].map((_, index) => (
+              <option key={index} value={index + 1}>{index + 1}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <input
+            type="checkbox"
+            checked={searchingCommander}
+            onChange={(e) => setSearchingCommander(e.target.checked)}
+          />
+          <label htmlFor="commander">Commander</label>
+        </div>
+
+        <button onClick={() => searchRandCards(numberOfCards)}>Cambiar Carta</button>
+
+        {/* Botón para eliminar todas las cartas, visible solo si hay cartas */}
+        {cardList.length > 0 && (
+          <button onClick={clearCards}>Eliminar Todas las Cartas</button>
+        )}
       </div>
 
-      <button onClick={searchRandCard}>Cambiar Carta</button>
-
-      {cardList.map((card, index) => (
-        <CardComponent key={index} card={card} />
-      ))}
-    </>
+      {/* Sección scrollable de cartas */}
+      <div className="card-grid">
+        {cardList.map((card, index) => (
+          <CardComponent key={index} card={card} />
+        ))}
+      </div>
+    </div>
   );
 }
 
