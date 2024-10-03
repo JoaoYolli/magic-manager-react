@@ -9,11 +9,34 @@
   
   /* La sección de controles queda fija en la parte superior */
   .controls {
-    display:block;
-    background-color: (0,0,0,0); /* Color de fondo para distinguir */
+    background-color: rgba(0, 0, 0, 0.1); /* Color de fondo para distinguir */
     padding: 20px;
     border-bottom: 1px solid #ccc;
     flex-shrink: 0; /* Fija la sección de controles */
+    max-width: 800px; /* Establece un ancho máximo fijo para los controles */
+    margin: 0 auto; /* Centra la sección de controles horizontalmente */
+    height: 100px; /* Establece una altura fija para la sección de controles */
+  }
+  
+  /* Estilo para el spinner */
+  .spinner {
+    border: 8px solid #f3f3f3; /* Color del fondo */
+    border-top: 8px solid #3498db; /* Color de la parte superior del spinner */
+    border-radius: 50%; /* Forma circular */
+    width: 40px; /* Ancho */
+    height: 40px; /* Alto */
+    animation: spin 1s linear infinite; /* Animación continua */
+    position: fixed; /* Posición fija */
+    top: 50%; /* Centrar verticalmente */
+    left: 50%; /* Centrar horizontalmente */
+    transform: translate(-50%, -50%); /* Ajustar para centrar correctamente */
+    z-index: 1000; /* Asegurar que esté encima de otros elementos */
+  }
+  
+  /* Animación de rotación */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
   
   /* La sección de las cartas tiene scroll */
@@ -25,6 +48,7 @@
     overflow-y: auto; /* Scroll solo en el eje Y */
     height: calc(100vh - 200px); /* Ajustar altura considerando la altura fija de los controles */
     max-height: calc(100vh - 200px); /* Ajustar altura máxima */
+    width: 100%; /* Ocupa todo el ancho disponible */
   }
   
   /* Espaciado entre cartas */

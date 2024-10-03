@@ -8,7 +8,8 @@ import CardModel from '../../models/card';
 function MainPage() {
   const [cardList, setCardsList] = useState<CardModel[]>([]);
   const [searchingCommander, setSearchingCommander] = useState<boolean>(false);
-  const [numberOfCards, setNumberOfCards] = useState<number>(1); // Nuevo estado para el número de cartas
+  const [numberOfCards, setNumberOfCards] = useState<number>(1); // Estado para el número de cartas
+  const [loading, setLoading] = useState<boolean>(false); // Estado para cargar cartas
   const navigate = useNavigate();
 
   const getItemFromLocalStorage = (key: string): string | null => {
@@ -24,6 +25,7 @@ function MainPage() {
     }
 
     const promises = []; // Para almacenar las promesas de búsqueda
+    setLoading(true); // Establece loading en true al iniciar la búsqueda
 
     for (let i = 0; i < count; i++) {
       promises.push(fetch(url + (searchingCommander ? '/randCommander' : '/randCard'), {
@@ -68,6 +70,8 @@ function MainPage() {
       setCardsList((prevCards) => [...prevCards, ...newCards]);
     } catch (error) {
       console.error('Error:', error);
+    } finally {
+      setLoading(false); // Establece loading en false después de recibir las cartas
     }
   }
 
@@ -154,6 +158,9 @@ function MainPage() {
           <button onClick={clearCards}>Eliminar Todas las Cartas</button>
         )}
       </div>
+
+      {/* Indicador de carga (spinner) */}
+      {loading && <div className="spinner"></div>}
 
       {/* Sección scrollable de cartas */}
       <div className="card-grid">
