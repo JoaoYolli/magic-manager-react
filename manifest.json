@@ -1,0 +1,39 @@
+{
+
+  "short_name": "Mtg",
+
+  "name": "MTG Manager",
+
+  "icons": [
+
+    {
+
+      "src": "icons/icon-192x192.png",
+
+      "type": "image/png",
+
+      "sizes": "192x192"
+
+    },
+
+    {
+
+      "src": "icons/icon-512x512.png",
+
+      "type": "image/png",
+
+      "sizes": "512x512"
+
+    }
+
+  ],
+
+  "start_url": ".",
+
+  "display": "standalone",
+
+  "theme_color": "#ffffff",
+
+  "background_color": "#ffffff"
+
+}
